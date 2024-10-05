@@ -10,6 +10,7 @@ from sklearn.metrics import accuracy_score
 from network.network import Network
 from layers.FCLayer import FCLayer
 from layers.activation_layer import ActivationLayer
+from layers.dropout_layer import DropoutLayer
 
 # Fetch the bank marketing dataset
 bank_marketing = fetch_ucirepo(id=222)
@@ -47,6 +48,12 @@ def sigmoid(x):
 def sigmoid_prime(x):
     return sigmoid(x) * (1 - sigmoid(x))
 
+def leaky_relu(x):
+    return np.where(x > 0, x, 0.01 * x)
+
+def leaky_relu_prime(x):
+    return np.where(x > 0, 1, 0.01)
+
 # Define loss functions
 def loss(y_true, y_pred):
     return 0.5 * (y_true - y_pred) ** 2
@@ -58,8 +65,12 @@ def loss_prime(y_true, y_pred):
 network = Network()
 input_size = x_train.shape[1]
 
-network.add(FCLayer((1, input_size), (1, 64)))
-network.add(ActivationLayer((1, 64), (1, 64), relu, relu_prime))
+network.add(FCLayer((1, input_size), (1, 128)))  
+network.add(ActivationLayer((1, 128), (1, 128), sigmoid, sigmoid_prime))
+
+network.add(FCLayer((1, 128), (1, 64)))  
+network.add(ActivationLayer((1, 64), (1, 64), sigmoid, sigmoid_prime))
+
 network.add(FCLayer((1, 64), (1, 1)))
 network.add(ActivationLayer((1, 1), (1, 1), sigmoid, sigmoid_prime))
 
